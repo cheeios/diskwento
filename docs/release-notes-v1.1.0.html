@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diskwento v1.1.0 Release Notes</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #1c1c1e;
+      background: #f2f2f7;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      background: linear-gradient(145deg, #007AFF 0%, #0055B3 100%);
+      padding: 56px 48px 48px;
+      color: #ffffff;
+    }
+    .cover-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .cover h1 {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .cover-tagline {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 32px;
+    }
+    .cover-meta {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .cover-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .cover-meta-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+    }
+    .cover-meta-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ── Body ── */
+    .body {
+      padding: 40px 48px 56px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: #8e8e93;
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: #1c1c1e;
+      margin-bottom: 8px;
+    }
+
+    .section p {
+      color: #3c3c43;
+      margin-bottom: 12px;
+    }
+
+    /* ── Feature cards ── */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-card {
+      border: 1px solid #e5e5ea;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .feature-body { flex: 1; }
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1c1c1e;
+      margin-bottom: 4px;
+    }
+    .feature-desc {
+      font-size: 14px;
+      color: #6c6c70;
+      line-height: 1.55;
+      margin: 0;
+    }
+    .feature-bullets {
+      margin: 8px 0 0 0;
+      padding-left: 18px;
+    }
+    .feature-bullets li {
+      font-size: 13px;
+      color: #6c6c70;
+      margin-bottom: 3px;
+      line-height: 1.5;
+    }
+
+    /* ── Change list ── */
+    .change-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .change-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #f9f9fb;
+    }
+    .change-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .change-text {
+      font-size: 14px;
+      color: #3c3c43;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .change-text strong { color: #1c1c1e; }
+
+    /* ── Accessibility grid ── */
+    .a11y-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .a11y-card {
+      background: #f2f2f7;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .a11y-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1c1c1e;
+      margin-bottom: 4px;
+    }
+    .a11y-card-desc {
+      font-size: 12px;
+      color: #6c6c70;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ── Law box ── */
+    .law-box {
+      background: #f2f2f7;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .law-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .law-pill {
+      background: #5856D6;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .law-desc {
+      font-size: 13px;
+      color: #3c3c43;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ── Tags ── */
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 11px;
+      border-radius: 20px;
+    }
+    .tag-blue  { background: #e5f1ff; color: #0055c4; }
+    .tag-green { background: #e8faf0; color: #1a7c3e; }
+    .tag-gray  { background: #f2f2f7; color: #3c3c43; }
+
+    /* ── Divider ── */
+    hr {
+      border: none;
+      border-top: 1px solid #e5e5ea;
+      margin: 32px 0;
+    }
+
+    /* ── Upgrade notice ── */
+    .upgrade-box {
+      background: linear-gradient(135deg, #e5f1ff, #f0e8ff);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .upgrade-box p {
+      font-size: 14px;
+      color: #1c1c1e;
+      margin: 0;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: #f2f2f7;
+      padding: 20px 48px;
+      border-top: 1px solid #e5e5ea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer p {
+      font-size: 12px;
+      color: #8e8e93;
+      margin: 0;
+    }
+    .footer a {
+      color: #007AFF;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .cover, .body, .footer { padding-left: 24px; padding-right: 24px; }
+      .a11y-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { margin: 0; border-radius: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Cover -->
+    <div class="cover">
+      <div class="cover-badge">Release Notes</div>
+      <h1>Diskwento</h1>
+      <p class="cover-tagline">Your discount checker for PWD and Senior Citizens in the Philippines.</p>
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          <span class="cover-meta-label">Version</span>
+          <span class="cover-meta-value">1.1.0</span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="cover-meta-label">Release Date</span>
+          <span class="cover-meta-value">May 19, 2026</span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="cover-meta-label">Platform</span>
+          <span class="cover-meta-value">iOS &amp; Android</span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="cover-meta-label">Developer</span>
+          <span class="cover-meta-value">Carlo Corcuera</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+
+      <!-- Overview -->
+      <div class="section">
+        <p class="section-label">Overview</p>
+        <h2>What's New</h2>
+        <p>
+          Version 1.1.0 is a major update that expands Diskwento beyond the core discount checker.
+          This release introduces document storage, transaction history, a standalone VAT calculator,
+          full accessibility support for users with disabilities, and official Android support.
+        </p>
+        <div class="upgrade-box">
+          <p>
+            <strong>Upgrading from v1.0.0?</strong> When you open the app for the first time after
+            updating, a short What's New walkthrough will highlight the three biggest additions.
+          </p>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- New Features -->
+      <div class="section">
+        <p class="section-label">New Features</p>
+        <h2>What's Been Added</h2>
+        <div class="feature-list">
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background:#eeeeff;">🧮</div>
+            <div class="feature-body">
+              <p class="feature-title">VAT Calculator</p>
+              <p class="feature-desc">
+                A standalone tool for understanding how much 12% VAT is embedded in any price.
+                See the base price, the tax amount, and compare with VAT rates from over 20
+                countries around the world.
+              </p>
+              <ul class="feature-bullets">
+                <li>Instant 12% VAT breakdown: base price, tax amount, VAT-inclusive total</li>
+                <li>Random "VAT Around the World" comparison — 20+ countries</li>
+                <li>Special historical note: the Philippines' VAT before RA 9337 raised it to 12% in 2006</li>
+                <li>Save calculations to transaction history with a custom label</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background:#f0eeff;">📋</div>
+            <div class="feature-body">
+              <p class="feature-title">Reseta Vault</p>
+              <p class="feature-desc">
+                Store your prescriptions and receipts as photos, privately on your device.
+                No cloud, no account, no internet required.
+              </p>
+              <ul class="feature-bullets">
+                <li>Take a photo or choose from your library</li>
+                <li>Full-screen viewer with pinch-to-zoom and pan</li>
+                <li>Double-tap to reset zoom</li>
+                <li>Stored in app's private directory — not accessible to other apps</li>
+                <li>Long-press thumbnail or use the trash icon in viewer to delete</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background:#eeeeff;">🪪</div>
+            <div class="feature-body">
+              <p class="feature-title">Discount ID Storage</p>
+              <p class="feature-desc">
+                Keep a digital copy of your PWD ID and Senior Citizen ID inside the app,
+                accessible offline at any time.
+              </p>
+              <ul class="feature-bullets">
+                <li>Separate sections for PWD ID and Senior Citizen ID</li>
+                <li>Full-screen viewer with pinch-to-zoom and pan</li>
+                <li>Stored privately on-device</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background:#fff5e5;">🕐</div>
+            <div class="feature-body">
+              <p class="feature-title">Transaction History</p>
+              <p class="feature-desc">
+                Every discount check and VAT calculation you save is stored in one place,
+                organized by date.
+              </p>
+              <ul class="feature-bullets">
+                <li>Shows discount transactions and VAT calculations in a unified timeline</li>
+                <li>Status pill per transaction: Correct, Overcharged, or Reported</li>
+                <li>Swipe left to delete individual entries</li>
+                <li>Clear All option for bulk deletion</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon" style="background:#f2f2f7;">📖</div>
+            <div class="feature-body">
+              <p class="feature-title">Onboarding &amp; About Screen</p>
+              <p class="feature-desc">
+                New users are welcomed with a 4-slide introduction explaining the app's purpose,
+                the correct workflow, and key features.
+              </p>
+              <ul class="feature-bullets">
+                <li>4 slides: Welcome, After Your Receipt, Compare &amp; Report, Know Your Taxes</li>
+                <li>Skip or tap through; preference saved — never shown again after completion</li>
+                <li>About screen with version info, developer contact, and legal links</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- Accessibility -->
+      <div class="section">
+        <p class="section-label">Accessibility</p>
+        <h2>Built for Everyone</h2>
+        <p>
+          v1.1.0 includes a comprehensive accessibility pass across every screen, making Diskwento
+          fully usable for people who rely on screen readers or other assistive technologies.
+        </p>
+        <div class="a11y-grid">
+          <div class="a11y-card">
+            <p class="a11y-card-title">VoiceOver (iOS)</p>
+            <p class="a11y-card-desc">All screens fully labeled. Buttons, rows, modals, and dynamic state changes are all announced correctly.</p>
+          </div>
+          <div class="a11y-card">
+            <p class="a11y-card-title">TalkBack (Android)</p>
+            <p class="a11y-card-desc">Full TalkBack support across all screens. Swipeable list rows include an Actions rotor entry for delete.</p>
+          </div>
+          <div class="a11y-card">
+            <p class="a11y-card-title">Reduce Motion</p>
+            <p class="a11y-card-desc">All animations (home card press, VAT fade-in, onboarding dots, image viewer spring) are disabled when Reduce Motion is on.</p>
+          </div>
+          <div class="a11y-card">
+            <p class="a11y-card-title">Dynamic Type &amp; Font Scaling</p>
+            <p class="a11y-card-desc">Text scales correctly with iOS Dynamic Type and Android font size settings. Caps raised to 1.4×–1.5× on key elements.</p>
+          </div>
+          <div class="a11y-card">
+            <p class="a11y-card-title">Modal Accessibility</p>
+            <p class="a11y-card-desc">All modals set <code>accessibilityViewIsModal</code> so VoiceOver focus is trapped inside while they are open.</p>
+          </div>
+          <div class="a11y-card">
+            <p class="a11y-card-title">Semantic Roles</p>
+            <p class="a11y-card-desc">Headers, buttons, and links are correctly marked. Decorative elements are hidden from the accessibility tree.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- Android Improvements -->
+      <div class="section">
+        <p class="section-label">Platform</p>
+        <h2>Android Support</h2>
+        <p>Diskwento is now available on Android. Several platform-specific fixes were required:</p>
+        <div class="change-list">
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Save Transaction modal</strong> — Android does not support <code>Alert.prompt</code>. A native-styled modal with a text input is shown instead.</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Image viewer zoom</strong> — Android's <code>Modal</code> creates a new native window outside the gesture handler root. Fixed by wrapping each viewer with its own <code>GestureHandlerRootView</code>.</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Gesture responsiveness</strong> — Double-tap detection lag reduced from 500 ms to 200 ms. All gesture callbacks explicitly run on the UI thread via the <code>'worklet'</code> directive. Pan uses <code>averageTouches</code> for smooth multi-finger tracking.</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Font size accessibility</strong> — <code>maxFontSizeMultiplier</code> caps raised across all screens so Android's "Largest" font size setting is properly respected.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- Legal -->
+      <div class="section">
+        <p class="section-label">Legal Basis</p>
+        <h2>Statutory Foundation</h2>
+        <div class="law-box">
+          <div class="law-row">
+            <span class="law-pill">RA 9994</span>
+            <p class="law-desc">
+              <strong>Expanded Senior Citizens Act of 2010</strong> — Grants senior citizens (60+) a
+              20% discount and VAT exemption on covered goods and services.
+            </p>
+          </div>
+          <div class="law-row">
+            <span class="law-pill">RA 7277</span>
+            <p class="law-desc">
+              <strong>Magna Carta for Persons with Disability</strong> — As amended by RA 9442 and
+              RA 10754, grants PWD cardholders a 20% discount and VAT exemption on covered
+              establishments.
+            </p>
+          </div>
+          <div class="law-row">
+            <span class="law-pill">RA 9337</span>
+            <p class="law-desc">
+              <strong>Reformed VAT (RVAT) Law</strong> — Raised the Philippine VAT rate from 10% to
+              12% effective February 1, 2006. Referenced in the VAT Calculator's historical
+              comparison feature.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- Requirements -->
+      <div class="section">
+        <p class="section-label">Requirements</p>
+        <h2>System Requirements</h2>
+        <div class="tag-row">
+          <span class="tag tag-blue">iOS 16.0+</span>
+          <span class="tag tag-green">Android 10+</span>
+          <span class="tag tag-gray">iPhone only (iOS)</span>
+          <span class="tag tag-gray">~20 MB</span>
+          <span class="tag tag-gray">No account required</span>
+        </div>
+        <p style="margin-top: 12px; font-size: 14px; color: #6c6c70;">
+          Internet connection required only for report filing. All other features — including
+          document storage, history, and the VAT calculator — work fully offline.
+        </p>
+      </div>
+
+      <hr />
+
+      <!-- Changelog vs 1.0.0 -->
+      <div class="section">
+        <p class="section-label">Changelog</p>
+        <h2>Changes Since v1.0.0</h2>
+        <div class="change-list">
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> VAT Calculator with 12% breakdown and world comparison</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> Reseta Vault — on-device prescription and receipt photo storage</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> Discount ID Storage — PWD ID and Senior Citizen ID photos</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> Transaction History with unified timeline and swipe-to-delete</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> Onboarding flow (4 slides) for first-time users</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> What's New screen for users upgrading from v1.0.0</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#007AFF;"></div>
+            <p class="change-text"><strong>New:</strong> About screen with version info, legal links, and support contact</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Improved:</strong> Full VoiceOver and TalkBack accessibility across all screens</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Improved:</strong> Reduce Motion support — all animations respect system preference</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#34C759;"></div>
+            <p class="change-text"><strong>Improved:</strong> Dynamic Type and Android font scaling support</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#FF9500;"></div>
+            <p class="change-text"><strong>Fixed (Android):</strong> VAT Calculator save modal now uses a custom input dialog</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#FF9500;"></div>
+            <p class="change-text"><strong>Fixed (Android):</strong> Pinch-to-zoom in image viewers now works correctly</p>
+          </div>
+          <div class="change-row">
+            <div class="change-dot" style="background:#FF9500;"></div>
+            <p class="change-text"><strong>Fixed (Android):</strong> Gesture lag in image viewers reduced significantly</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Diskwento Mobile App PH &mdash; Version 1.1.0</p>
+      <p>
+        <a href="https://diskwento.app">diskwento.app</a>
+        &nbsp;&middot;&nbsp;
+        <a href="mailto:hello@diskwento.app">hello@diskwento.app</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
