@@ -23,7 +23,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { SymbolView } from 'expo-symbols';
 
@@ -126,25 +126,32 @@ export default function DocumentVaultScreen() {
 
   const pinch = Gesture.Pinch()
     .onUpdate(e => {
+      'worklet';
       scale.value = Math.max(1, Math.min(savedScale.value * e.scale, 6));
     })
     .onEnd(() => {
+      'worklet';
       savedScale.value = scale.value;
     });
 
   const pan = Gesture.Pan()
+    .averageTouches(true)
     .onUpdate(e => {
+      'worklet';
       tx.value = savedTx.value + e.translationX;
       ty.value = savedTy.value + e.translationY;
     })
     .onEnd(() => {
+      'worklet';
       savedTx.value = tx.value;
       savedTy.value = ty.value;
     });
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
+    .maxDelay(200)
     .onEnd(() => {
+      'worklet';
       scale.value      = withSpring(1);
       savedScale.value = 1;
       tx.value         = withSpring(0);
@@ -153,8 +160,7 @@ export default function DocumentVaultScreen() {
       savedTy.value    = 0;
     });
 
-  const composed = Gesture.Simultaneous(pinch, pan);
-  const zoomGesture = Gesture.Exclusive(doubleTap, composed);
+  const zoomGesture = Gesture.Exclusive(doubleTap, Gesture.Simultaneous(pinch, pan));
 
   const zoomStyle = useAnimatedStyle(() => ({
     transform: [
@@ -346,6 +352,7 @@ export default function DocumentVaultScreen() {
         onRequestClose={closeViewer}
         accessibilityViewIsModal={true}
       >
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.viewerRoot}>
           <GestureDetector gesture={zoomGesture}>
             <Animated.View style={[styles.viewerImg, zoomStyle]}>
@@ -384,6 +391,7 @@ export default function DocumentVaultScreen() {
             </Pressable>
           </View>
         </View>
+        </GestureHandlerRootView>
       </Modal>
     </>
   );

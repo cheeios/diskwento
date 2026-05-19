@@ -23,7 +23,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SymbolView } from 'expo-symbols';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -137,16 +137,19 @@ export default function DiscountIdScreen() {
   }
 
   const pinch = Gesture.Pinch()
-    .onUpdate(e => { scale.value = Math.max(1, Math.min(savedScale.value * e.scale, 6)); })
-    .onEnd(() => { savedScale.value = scale.value; });
+    .onUpdate(e => { 'worklet'; scale.value = Math.max(1, Math.min(savedScale.value * e.scale, 6)); })
+    .onEnd(() => { 'worklet'; savedScale.value = scale.value; });
 
   const pan = Gesture.Pan()
-    .onUpdate(e => { tx.value = savedTx.value + e.translationX; ty.value = savedTy.value + e.translationY; })
-    .onEnd(() => { savedTx.value = tx.value; savedTy.value = ty.value; });
+    .averageTouches(true)
+    .onUpdate(e => { 'worklet'; tx.value = savedTx.value + e.translationX; ty.value = savedTy.value + e.translationY; })
+    .onEnd(() => { 'worklet'; savedTx.value = tx.value; savedTy.value = ty.value; });
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
+    .maxDelay(200)
     .onEnd(() => {
+      'worklet';
       scale.value = withSpring(1); savedScale.value = 1;
       tx.value = withSpring(0);    savedTx.value = 0;
       ty.value = withSpring(0);    savedTy.value = 0;
@@ -313,6 +316,7 @@ export default function DiscountIdScreen() {
 
       {/* ── Fullscreen viewer ── */}
       <Modal visible={!!viewer} animationType="fade" statusBarTranslucent onRequestClose={closeViewer} accessibilityViewIsModal={true}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.viewerRoot}>
           <GestureDetector gesture={zoomGesture}>
             <Animated.View style={[styles.viewerImg, zoomStyle]}>
@@ -350,6 +354,7 @@ export default function DiscountIdScreen() {
             </Pressable>
           </View>
         </View>
+        </GestureHandlerRootView>
       </Modal>
     </>
   );

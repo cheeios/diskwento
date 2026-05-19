@@ -224,7 +224,7 @@ export default function ResultScreen() {
                 returnKeyType="done"
                 selectTextOnFocus
                 autoFocus
-                maxFontSizeMultiplier={1.2}
+                maxFontSizeMultiplier={1.4}
                 accessibilityLabel="Amount charged by establishment"
                 accessibilityHint="Enter the peso total from your receipt"
               />
@@ -473,7 +473,7 @@ function BRow({
           hero && styles.bHeroValue,
           valueColor ? { color: valueColor } : null,
         ]}
-        maxFontSizeMultiplier={hero ? 1.2 : 1.3}
+        maxFontSizeMultiplier={hero ? 1.4 : 1.5}
       >
         {value}
       </Text>

@@ -4,9 +4,11 @@ export type VatRate = {
   flag: string;
   rate: number;
   label: string;
+  isHistorical?: boolean;
 };
 
 export const VAT_RATES: VatRate[] = [
+  { country: 'Philippines', code: 'PH', flag: '🇵🇭', rate: 0.10, label: 'Old VAT · Before 2006', isHistorical: true },
   { country: 'Singapore',     code: 'SG', flag: '🇸🇬', rate: 0.09, label: 'GST' },
   { country: 'Taiwan',        code: 'TW', flag: '🇹🇼', rate: 0.05, label: 'VAT' },
   { country: 'Japan',         code: 'JP', flag: '🇯🇵', rate: 0.10, label: 'Consumption Tax' },

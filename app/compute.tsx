@@ -163,7 +163,6 @@ export default function ComputeScreen() {
               onChangeText={setTxName}
               returnKeyType="done"
               clearButtonMode="while-editing"
-              maxFontSizeMultiplier={1.3}
               accessibilityLabel="Transaction name"
               accessibilityHint="Enter the name of the establishment"
             />
@@ -388,7 +387,6 @@ function ItemRow({
           value={item.name}
           onChangeText={t => onChange({ name: t })}
           returnKeyType="next"
-          maxFontSizeMultiplier={1.3}
           accessibilityLabel={`${itemLabel} name`}
           accessibilityHint="Optional item description"
         />
@@ -418,7 +416,7 @@ function ItemRow({
           keyboardType="decimal-pad"
           returnKeyType="done"
           selectTextOnFocus
-          maxFontSizeMultiplier={1.2}
+          maxFontSizeMultiplier={1.4}
           accessibilityLabel={`${itemLabel} price in pesos`}
           accessibilityHint="Enter the price as shown on the menu or receipt"
         />
@@ -470,7 +468,7 @@ function SummaryRow({
           hero && styles.summaryHeroValue,
           valueColor ? { color: valueColor } : null,
         ]}
-        maxFontSizeMultiplier={hero ? 1.2 : 1.3}
+        maxFontSizeMultiplier={hero ? 1.4 : 1.5}
       >
         {value}
       </Text>

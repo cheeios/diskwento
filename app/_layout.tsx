@@ -8,10 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ONBOARDING_KEY } from './onboarding';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { WHATS_NEW_KEY, WHATS_NEW_VERSION } from './whats-new';
 
 function OnboardingGate() {
   const router = useRouter();
@@ -27,6 +24,30 @@ function OnboardingGate() {
   return null;
 }
 
+function WhatsNewGate() {
+  const router = useRouter();
+
+  useEffect(() => {
+    async function check() {
+      const [onboarded, seen] = await Promise.all([
+        AsyncStorage.getItem(ONBOARDING_KEY),
+        AsyncStorage.getItem(WHATS_NEW_KEY),
+      ]);
+      // Only show for existing users who haven't seen this version yet
+      if (onboarded === 'true' && seen !== WHATS_NEW_VERSION) {
+        router.replace('/whats-new' as any);
+      }
+    }
+    check();
+  }, [router]);
+
+  return null;
+}
+
+export const unstable_settings = {
+  anchor: '(tabs)',
+};
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -36,6 +57,7 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="whats-new" options={{ headerShown: false, gestureEnabled: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
           <Stack.Screen name="compute" options={{ headerBackTitle: 'Back' }} />
           <Stack.Screen name="result" options={{ headerBackTitle: 'Compute' }} />
@@ -47,6 +69,7 @@ export default function RootLayout() {
           <Stack.Screen name="discount-id" options={{ headerBackTitle: 'Home' }} />
         </Stack>
         <OnboardingGate />
+        <WhatsNewGate />
         <StatusBar style="auto" />
       </ThemeProvider>
     </GestureHandlerRootView>

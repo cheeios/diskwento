@@ -287,7 +287,7 @@ function TransactionRow({
             <View style={[styles.typePill, { backgroundColor: bg }]}>
               <Text style={[styles.typePillText, { color: text }]} allowFontScaling={false}>{pillLabel}</Text>
             </View>
-            <Text style={[styles.txAmount, { color: text }]} maxFontSizeMultiplier={1.2}>{peso(tx.computedTotal)}</Text>
+            <Text style={[styles.txAmount, { color: text }]} maxFontSizeMultiplier={1.4}>{peso(tx.computedTotal)}</Text>
           </View>
           {tx.isCorrect ? (
             <View style={styles.txStatusRow}>
@@ -358,7 +358,7 @@ function VatRow({ tx, onDelete }: { tx: VatTransaction; onDelete: () => void }) 
             <View style={[styles.vatPill, { backgroundColor: Colors.accentLight }]}>
               <Text style={styles.vatPillText} allowFontScaling={false}>VAT</Text>
             </View>
-            <Text style={[styles.txAmount, { color: text }]} maxFontSizeMultiplier={1.2}>
+            <Text style={[styles.txAmount, { color: text }]} maxFontSizeMultiplier={1.4}>
               {peso(tx.price)}
             </Text>
           </View>

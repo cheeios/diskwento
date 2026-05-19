@@ -3,6 +3,8 @@ import {
   Alert,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -43,6 +45,8 @@ export default function VatCalculatorScreen() {
   const reduceMotion = useReduceMotion();
 
   const [rawPrice, setRawPrice] = useState('');
+  const [labelModal, setLabelModal] = useState(false);
+  const [labelText, setLabelText] = useState('');
   const [showSections, setShowSections] = useState(false);
   const debounceRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sectionOpacity   = useRef(new Animated.Value(0)).current;
@@ -61,19 +65,15 @@ export default function VatCalculatorScreen() {
   const exVat  = price / 1.12;
   const vatAmt = price - exVat;
 
-  // ── Old 10% VAT comparison ─────────────────────────────────────────────
-  const price10 = exVat * 1.10;
-  const savings = price - price10;
+  const defaultLabel = `₱${price.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
+
+  async function doSave(label: string) {
+    await saveVatTransaction({ label: label.trim() || defaultLabel, price, exVat, vatAmount: vatAmt });
+    Alert.alert('Saved', 'VAT transaction saved to history.');
+  }
 
   async function handleSave() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const defaultLabel = `₱${price.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`;
-
-    const doSave = async (label: string) => {
-      await saveVatTransaction({ label: label.trim() || defaultLabel, price, exVat, vatAmount: vatAmt });
-      Alert.alert('Saved', 'VAT transaction saved to history.');
-    };
-
     if (Platform.OS === 'ios') {
       Alert.prompt(
         'Save Transaction',
@@ -86,8 +86,8 @@ export default function VatCalculatorScreen() {
         '',
       );
     } else {
-      await doSave(defaultLabel);
-      Alert.alert('Saved', 'VAT transaction saved to history.');
+      setLabelText('');
+      setLabelModal(true);
     }
   }
 
@@ -166,7 +166,7 @@ export default function VatCalculatorScreen() {
                 keyboardType="decimal-pad"
                 returnKeyType="done"
                 selectTextOnFocus
-                maxFontSizeMultiplier={1.2}
+                maxFontSizeMultiplier={1.4}
                 accessibilityLabel="Price amount"
                 accessibilityHint="Enter the VAT-inclusive price"
               />
@@ -216,29 +216,20 @@ export default function VatCalculatorScreen() {
                 />
               </View>
 
-              <SectionLabel text="DID YOU KNOW?" secondary={secondary} />
-              <View style={[styles.card, { backgroundColor: card }]}>
-                <View style={styles.knowBody}>
-                  <Text style={[styles.knowText, { color: secondary }]}>
-                    {'The Philippines used to have 10% VAT before it was raised to 12% on ' +
-                      'February 1, 2006 under RA 9337, also known as the Reformed VAT (RVAT) Law.\n\n' +
-                      "Here's what your bill would look like at the old 10% rate:"}
-                  </Text>
-                </View>
-                <View style={styles.totalDivider} />
-                <CalcRow label="At 10% VAT" value={peso(price10)} text={text} secondary={secondary} />
-                <Hairline />
-                <CalcRow
-                  label="You'd save"
-                  value={peso(savings)}
-                  valueColor={Colors.success}
-                  hero
-                  text={text}
-                  secondary={secondary}
-                />
-              </View>
+              <Pressable
+                accessibilityLabel="Save transaction"
+                accessibilityRole="button"
+                accessibilityHint="Saves this VAT computation to your history"
+                style={({ pressed }) => [styles.saveBtn, styles.saveBtnTop, pressed && { opacity: 0.85 }]}
+                onPress={handleSave}
+              >
+                <Text accessible={false} style={styles.saveBtnText}>Save Transaction</Text>
+              </Pressable>
 
-              <SectionLabel text="VAT AROUND THE WORLD" secondary={secondary} />
+              <SectionLabel
+                text={randomCountry.isHistorical ? 'DID YOU KNOW?' : 'VAT AROUND THE WORLD'}
+                secondary={secondary}
+              />
               <WorldCard
                 country={randomCountry}
                 price={price}
@@ -249,16 +240,6 @@ export default function VatCalculatorScreen() {
                 secondary={secondary}
               />
 
-              <Pressable
-                accessibilityLabel="Save transaction"
-                accessibilityRole="button"
-                accessibilityHint="Saves this VAT computation to your history"
-                style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}
-                onPress={handleSave}
-              >
-                <Text accessible={false} style={styles.saveBtnText}>Save Transaction</Text>
-              </Pressable>
-
               <Text accessible={false} style={styles.footnote} allowFontScaling={false}>
                 VAT rates sourced from globalvatcompliance.com. Figures are for reference only and assume the same base price.
               </Text>
@@ -267,6 +248,53 @@ export default function VatCalculatorScreen() {
 
         </ScrollView>
       </View>
+
+      {/* ── Android label modal ────────────────────────────────────────── */}
+      <Modal
+        visible={labelModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLabelModal(false)}
+        accessibilityViewIsModal
+      >
+        <KeyboardAvoidingView behavior="padding" style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { backgroundColor: card }]}>
+            <Text style={[styles.modalTitle, { color: text }]}>Save Transaction</Text>
+            <Text style={[styles.modalSubtitle, { color: secondary }]}>
+              Add a label (e.g. Mercury Drug, SM Supermarket)
+            </Text>
+            <TextInput
+              style={[styles.modalInput, { color: text, borderColor: secondary }]}
+              placeholder={defaultLabel}
+              placeholderTextColor={Colors.placeholder}
+              value={labelText}
+              onChangeText={setLabelText}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={() => { setLabelModal(false); doSave(labelText); }}
+              accessibilityLabel="Transaction label"
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cancel"
+                onPress={() => setLabelModal(false)}
+                style={[styles.modalBtn, styles.modalBtnCancel]}
+              >
+                <Text style={[styles.modalBtnText, { color: secondary }]}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Save transaction"
+                onPress={() => { setLabelModal(false); doSave(labelText); }}
+                style={[styles.modalBtn, styles.modalBtnSave]}
+              >
+                <Text style={[styles.modalBtnText, { color: '#fff' }]}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </>
   );
 }
@@ -318,7 +346,7 @@ function CalcRow({
           hero && styles.calcHeroValue,
           valueColor ? { color: valueColor } : null,
         ]}
-        maxFontSizeMultiplier={hero ? 1.2 : 1.3}
+        maxFontSizeMultiplier={hero ? 1.4 : 1.5}
       >
         {value}
       </Text>
@@ -374,7 +402,19 @@ function WorldCard({
       {hasPrice ? (
         <>
           <View style={styles.worldBody}>
-            {isFree ? (
+            {country.isHistorical ? (
+              <Text style={[styles.worldBodyText, { color: secondary }]}>
+                {'On '}
+                <Text style={[styles.worldBodyBold, { color: text }]}>{'February 1, 2006'}</Text>
+                {', '}
+                <Text style={[styles.worldBodyBold, { color: text }]}>{'RA 9337'}</Text>
+                {' (the Reformed VAT Law) raised the Philippine VAT rate from '}
+                <Text style={[styles.worldBodyBold, { color: diffColor }]}>{'10%'}</Text>
+                {' to '}
+                <Text style={[styles.worldBodyBold, { color: Colors.danger }]}>{'12%'}</Text>
+                {". Here's what your bill would have looked like back then:"}
+              </Text>
+            ) : isFree ? (
               <Text style={[styles.worldBodyText, { color: secondary }]}>
                 {'Did you know? '}
                 <Text style={[styles.worldBodyBold, { color: text }]}>{country.country}</Text>
@@ -414,14 +454,18 @@ function WorldCard({
           <View style={styles.totalDivider} />
           <View
             accessible={true}
-            accessibilityLabel={`${isFree || isCheaper ? 'You save' : 'You pay more'}, ${isFree || isCheaper ? '− ' : '+ '}${peso(difference)}`}
+            accessibilityLabel={
+              country.isHistorical
+                ? `You would've saved, − ${peso(difference)}`
+                : `${isFree || isCheaper ? 'You save' : 'You pay more'}, ${isFree || isCheaper ? '− ' : '+ '}${peso(difference)}`
+            }
             style={styles.worldDiffRow}
           >
             <Text accessible={false} style={[styles.worldDiffLabel, { color: text }]}>
-              {isFree || isCheaper ? 'You save' : 'You pay more'}
+              {country.isHistorical ? "You would've saved" : (isFree || isCheaper ? 'You save' : 'You pay more')}
             </Text>
-            <Text accessible={false} style={[styles.worldDiffAmount, { color: diffColor }]} maxFontSizeMultiplier={1.2}>
-              {isFree || isCheaper ? '− ' : '+ '}{peso(difference)}
+            <Text accessible={false} style={[styles.worldDiffAmount, { color: diffColor }]} maxFontSizeMultiplier={1.4}>
+              {country.isHistorical || isFree || isCheaper ? '− ' : '+ '}{peso(difference)}
             </Text>
           </View>
         </>
@@ -540,13 +584,6 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
 
-  // ── Did You Know ──────────────────────────────────────────────────────────
-  knowBody: { paddingHorizontal: 16, paddingVertical: 14 },
-  knowText: {
-    fontSize: 14,
-    lineHeight: 21,
-  },
-
   // ── World card ────────────────────────────────────────────────────────────
   worldHeader: {
     flexDirection: 'row',
@@ -606,6 +643,10 @@ const styles = StyleSheet.create({
   },
 
   // ── Save button ───────────────────────────────────────────────────────────
+  saveBtnTop: {
+    marginTop: 20,
+    marginBottom: 4,
+  },
   saveBtn: {
     marginHorizontal: HZ,
     marginTop: 28,
@@ -625,6 +666,62 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     letterSpacing: 0.1,
+  },
+
+  // ── Android label modal ───────────────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  modalBox: {
+    borderRadius: 16,
+    padding: 20,
+    gap: 12,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginTop: 4,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 4,
+  },
+  modalBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalBtnCancel: {
+    backgroundColor: 'transparent',
+  },
+  modalBtnSave: {
+    backgroundColor: ACCENT,
+  },
+  modalBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 
   // ── Footnote ──────────────────────────────────────────────────────────────

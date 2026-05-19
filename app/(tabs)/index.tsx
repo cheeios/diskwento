@@ -90,14 +90,15 @@ const CARDS: HomeCard[] = [
 type VaultRow = {
   id: string;
   label: string;
+  subtitle: string;
   icon: string;
   color: string;
   route: string;
 };
 
 const VAULT_ROWS: VaultRow[] = [
-  { id: 'reseta',      label: 'My Reseta',      icon: 'cross.case',            color: Colors.accent, route: '/document-vault?type=reseta' },
-  { id: 'discount-id', label: 'My Discount ID', icon: 'person.crop.rectangle', color: Colors.pwd,    route: '/discount-id' },
+  { id: 'reseta',      label: 'Reseta',      subtitle: 'Prescriptions & receipts',    icon: 'cross.case',            color: Colors.accent, route: '/document-vault?type=reseta' },
+  { id: 'discount-id', label: 'Discount ID', subtitle: 'PWD ID & Senior Citizen ID',  icon: 'person.crop.rectangle', color: Colors.pwd,    route: '/discount-id' },
 ];
 
 // ─── screen ──────────────────────────────────────────────────────────────────
@@ -182,7 +183,7 @@ export default function HomeScreen() {
           <React.Fragment key={row.id}>
             {index > 0 && <View style={[styles.rowSep, { backgroundColor: sep }]} />}
             <Pressable
-              accessibilityLabel={row.label}
+              accessibilityLabel={`${row.label}, ${row.subtitle}`}
               accessibilityRole="button"
               accessibilityHint={
                 row.id === 'reseta'
@@ -195,7 +196,10 @@ export default function HomeScreen() {
               <View accessible={false} style={[styles.vaultIcon, { backgroundColor: row.color + '1A' }]}>
                 <Sym name={row.icon} size={20} tintColor={row.color} />
               </View>
-              <Text accessible={false} style={[styles.vaultLabel, { color: textColor }]}>{row.label}</Text>
+              <View accessible={false} style={{ flex: 1 }}>
+                <Text style={[styles.vaultLabel, { color: textColor }]}>{row.label}</Text>
+                <Text style={[styles.vaultSubtitle, { color: secondary }]}>{row.subtitle}</Text>
+              </View>
               <Sym name="chevron.right" size={16} tintColor={secondary} />
             </Pressable>
           </React.Fragment>
@@ -327,8 +331,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 13,
-    minHeight: 52,
+    paddingVertical: 14,
+    minHeight: 62,
     gap: 14,
   },
 
@@ -341,9 +345,14 @@ const styles = StyleSheet.create({
   },
 
   vaultLabel: {
-    flex: 1,
-    fontSize: 17,
-    fontWeight: '400',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
+  vaultSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
+    lineHeight: 18,
   },
 
   rowSep: {
