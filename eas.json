@@ -22,6 +22,15 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6766163085"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./secrets/singular-citron-361302-b7f9bd1460a0.json",
+        "track": "production",
+        "releaseStatus": "draft"
+      }
+    }
   }
 }
