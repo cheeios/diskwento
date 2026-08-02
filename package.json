@@ -1,7 +1,7 @@
 {
   "name": "diskwento",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -28,6 +28,7 @@
     "expo-linking": "~8.0.12",
     "expo-location": "~19.0.8",
     "expo-mail-composer": "~15.0.8",
+    "expo-quick-actions": "^6.0.2",
     "expo-router": "~6.0.23",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
@@ -47,9 +48,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "typescript": "~5.9.2",
     "eslint": "^9.25.0",
-    "eslint-config-expo": "~10.0.0"
+    "eslint-config-expo": "~10.0.0",
+    "typescript": "~5.9.2"
   },
   "private": true
 }

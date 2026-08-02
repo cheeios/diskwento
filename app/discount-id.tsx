@@ -21,7 +21,8 @@ import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SymbolView } from 'expo-symbols';
@@ -41,9 +42,19 @@ import {
 
 const COLS = 3;
 const GAP = 2;
-const { width: SCREEN_W } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const THUMB = (SCREEN_W - GAP * (COLS + 1)) / COLS;
 const DOC_DIR = FileSystem.documentDirectory + 'diskwento_docs/';
+
+// ─── zoom viewer tuning ─────────────────────────────────────────────────────
+const DOUBLE_TAP_SCALE = 3;
+const MAX_SCALE = 6;
+const ZOOM_ANIM = { duration: 220, easing: Easing.out(Easing.cubic) };
+
+function clampWorklet(value: number, limit: number) {
+  'worklet';
+  return Math.max(-limit, Math.min(limit, value));
+}
 
 const SECTIONS: { type: DocumentType; label: string; color: string; emptyText: string }[] = [
   {
@@ -137,22 +148,60 @@ export default function DiscountIdScreen() {
   }
 
   const pinch = Gesture.Pinch()
-    .onUpdate(e => { 'worklet'; scale.value = Math.max(1, Math.min(savedScale.value * e.scale, 6)); })
-    .onEnd(() => { 'worklet'; savedScale.value = scale.value; });
+    .onUpdate(e => {
+      'worklet';
+      const next = Math.max(1, Math.min(savedScale.value * e.scale, MAX_SCALE));
+      scale.value = next;
+      const maxTx = (SCREEN_W * (next - 1)) / 2;
+      const maxTy = (SCREEN_H * (next - 1)) / 2;
+      tx.value = clampWorklet(tx.value, maxTx);
+      ty.value = clampWorklet(ty.value, maxTy);
+    })
+    .onEnd(() => {
+      'worklet';
+      savedScale.value = scale.value;
+      savedTx.value = tx.value;
+      savedTy.value = ty.value;
+    });
 
   const pan = Gesture.Pan()
     .averageTouches(true)
-    .onUpdate(e => { 'worklet'; tx.value = savedTx.value + e.translationX; ty.value = savedTy.value + e.translationY; })
-    .onEnd(() => { 'worklet'; savedTx.value = tx.value; savedTy.value = ty.value; });
+    .onUpdate(e => {
+      'worklet';
+      if (savedScale.value <= 1) return;
+      const maxTx = (SCREEN_W * (savedScale.value - 1)) / 2;
+      const maxTy = (SCREEN_H * (savedScale.value - 1)) / 2;
+      tx.value = clampWorklet(savedTx.value + e.translationX, maxTx);
+      ty.value = clampWorklet(savedTy.value + e.translationY, maxTy);
+    })
+    .onEnd(() => {
+      'worklet';
+      savedTx.value = tx.value;
+      savedTy.value = ty.value;
+    });
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
-    .maxDelay(200)
-    .onEnd(() => {
+    .maxDelay(250)
+    .onEnd(e => {
       'worklet';
-      scale.value = withSpring(1); savedScale.value = 1;
-      tx.value = withSpring(0);    savedTx.value = 0;
-      ty.value = withSpring(0);    savedTy.value = 0;
+      if (scale.value > 1) {
+        // zoomed in -> snap back out, Apple Photos-style
+        scale.value = withTiming(1, ZOOM_ANIM);
+        tx.value = withTiming(0, ZOOM_ANIM);
+        ty.value = withTiming(0, ZOOM_ANIM);
+        savedScale.value = 1; savedTx.value = 0; savedTy.value = 0;
+      } else {
+        // zoom in, centered on the tapped point
+        const maxTx = (SCREEN_W * (DOUBLE_TAP_SCALE - 1)) / 2;
+        const maxTy = (SCREEN_H * (DOUBLE_TAP_SCALE - 1)) / 2;
+        const newTx = clampWorklet(DOUBLE_TAP_SCALE * (SCREEN_W / 2 - e.x), maxTx);
+        const newTy = clampWorklet(DOUBLE_TAP_SCALE * (SCREEN_H / 2 - e.y), maxTy);
+        scale.value = withTiming(DOUBLE_TAP_SCALE, ZOOM_ANIM);
+        tx.value = withTiming(newTx, ZOOM_ANIM);
+        ty.value = withTiming(newTy, ZOOM_ANIM);
+        savedScale.value = DOUBLE_TAP_SCALE; savedTx.value = newTx; savedTy.value = newTy;
+      }
     });
 
   const zoomGesture = Gesture.Exclusive(doubleTap, Gesture.Simultaneous(pinch, pan));
