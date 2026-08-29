@@ -63,7 +63,7 @@ const SLIDES: SlideData[] = [
     id: 'compare',
     icon: 'checkmark.seal',
     title: 'Compare & Report',
-    body: 'Enter your items and the amount charged on your receipt. If overcharged, file a formal complaint to DTI, NCDA, or your local PDAO/OSCA with one tap.',
+    body: 'Enter your items and the amount charged on your receipt. If overcharged, file a formal complaint to DTI or your local PDAO/OSCA with one tap.',
     iconColor: Colors.accent,
   },
   {

@@ -20,8 +20,10 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Colors } from '@/constants/colors';
 import { DiscountType } from '@/lib/discount';
+import { registerPositiveAction } from '@/lib/rateApp';
 import { saveTransaction } from '@/lib/storage';
 import { useReduceMotion } from '@/lib/useReduceMotion';
+import { RateAppModal } from '@/components/RateAppModal';
 
 // ─── icon helper ─────────────────────────────────────────────────────────────
 
@@ -106,6 +108,28 @@ export default function ResultScreen() {
   const [saving, setSaving]                     = useState(false);
   const [saved, setSaved]                       = useState(false);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
+  const [rateModalVisible, setRateModalVisible] = useState(false);
+  const pendingRatePrompt = useRef(false);
+  const navigateToHistoryAfterRate = useRef(false);
+
+  function closeSaveModal(navigateToHistory: boolean) {
+    setSaveModalVisible(false);
+    if (pendingRatePrompt.current) {
+      pendingRatePrompt.current = false;
+      navigateToHistoryAfterRate.current = navigateToHistory;
+      setTimeout(() => setRateModalVisible(true), 350);
+    } else if (navigateToHistory) {
+      router.push('/history');
+    }
+  }
+
+  function closeRateModal() {
+    setRateModalVisible(false);
+    if (navigateToHistoryAfterRate.current) {
+      navigateToHistoryAfterRate.current = false;
+      router.push('/history');
+    }
+  }
 
   const charged   = parseFloat(chargedRaw) || 0;
   const diff      = Math.max(0, charged - computedTotal);
@@ -172,6 +196,9 @@ export default function ResultScreen() {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSaved(true);
       setSaveModalVisible(true);
+      if (isCorrect) {
+        pendingRatePrompt.current = await registerPositiveAction();
+      }
     } catch {
       Alert.alert('Save Failed', 'Could not save transaction. Please try again.');
     } finally {
@@ -397,10 +424,7 @@ export default function ResultScreen() {
             accessibilityRole="button"
             accessibilityHint="Opens your saved transaction history"
             style={({ pressed }) => [styles.modalBtnFill, pressed && { opacity: 0.85 }]}
-            onPress={() => {
-              setSaveModalVisible(false);
-              router.push('/history');
-            }}
+            onPress={() => closeSaveModal(true)}
           >
             <Text accessible={false} style={styles.modalBtnFillText}>View History</Text>
           </Pressable>
@@ -409,12 +433,14 @@ export default function ResultScreen() {
             accessibilityRole="button"
             accessibilityHint="Closes this confirmation"
             style={({ pressed }) => [styles.modalBtnGhost, pressed && { opacity: 0.7 }]}
-            onPress={() => setSaveModalVisible(false)}
+            onPress={() => closeSaveModal(false)}
           >
             <Text accessible={false} style={[styles.modalBtnGhostText, { color: Colors.accent }]}>Done</Text>
           </Pressable>
         </View>
       </Modal>
+
+      <RateAppModal visible={rateModalVisible} onClose={closeRateModal} />
     </>
   );
 }

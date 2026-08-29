@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -13,9 +13,14 @@ import { useRouter } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { SymbolView } from 'expo-symbols';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 import { Colors } from '@/constants/colors';
+import { registerPositiveAction } from '@/lib/rateApp';
 import { useReduceMotion } from '@/lib/useReduceMotion';
+import { RateAppModal } from '@/components/RateAppModal';
+
+const APP_VERSION = Constants.expoConfig?.version ?? '1.3.0';
 
 // ─── icon helper ─────────────────────────────────────────────────────────────
 
@@ -114,7 +119,24 @@ export default function HomeScreen() {
   const card      = isDark ? Colors.dark.card        : Colors.surface;
   const sep       = isDark ? Colors.dark.separator   : Colors.separatorOpaque;
 
+  const [rateModalVisible, setRateModalVisible] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Small delay so the prompt never appears mid-launch, and gives the
+    // onboarding/what's-new gates time to redirect away first if needed.
+    const timer = setTimeout(async () => {
+      const shouldPrompt = await registerPositiveAction();
+      if (shouldPrompt && !cancelled) setRateModalVisible(true);
+    }, 2000);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, []);
+
   return (
+    <>
     <ScrollView
       style={{ flex: 1, backgroundColor: bg }}
       contentContainerStyle={[
@@ -215,9 +237,11 @@ export default function HomeScreen() {
         <Text style={[styles.disclaimer, { color: secondary }]} allowFontScaling={false}>
           Made with love {'&'} a little bit of Anthropic
         </Text>
-        <Text style={[styles.betaLabel, { color: secondary }]} allowFontScaling={false}>Version 1.1.0</Text>
+        <Text style={[styles.betaLabel, { color: secondary }]} allowFontScaling={false}>Version {APP_VERSION}</Text>
       </View>
     </ScrollView>
+    <RateAppModal visible={rateModalVisible} onClose={() => setRateModalVisible(false)} />
+    </>
   );
 }
 

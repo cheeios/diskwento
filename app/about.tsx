@@ -13,8 +13,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 import { Colors } from '@/constants/colors';
+
+const APP_VERSION = Constants.expoConfig?.version ?? '1.3.0';
 
 // ─── shared sub-components ───────────────────────────────────────────────────
 
@@ -118,7 +121,7 @@ export default function AboutScreen() {
           Diskwento Mobile App PH
         </Text>
         <Text style={[styles.version, { color: secondary }]}>
-          Version 1.1.0
+          Version {APP_VERSION}
         </Text>
       </View>
 
@@ -191,7 +194,7 @@ export default function AboutScreen() {
         <RowSeparator color={sep} />
         <LinkRow
           label="Report a Bug"
-          url="mailto:hello@diskwento.app?subject=Bug%20Report%20%E2%80%94%20Diskwento%20v1.1.0"
+          url={`mailto:hello@diskwento.app?subject=Bug%20Report%20%E2%80%94%20Diskwento%20v${APP_VERSION}`}
           textColor={textColor}
           secondary={secondary}
         />

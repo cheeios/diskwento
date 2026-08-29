@@ -28,6 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SymbolView } from 'expo-symbols';
 
 import { Colors } from '@/constants/colors';
+import { registerPositiveAction } from '@/lib/rateApp';
 import {
   addDocument,
   deleteDocument,
@@ -36,6 +37,7 @@ import {
   StoredDocument,
   DocumentType,
 } from '@/lib/storage';
+import { RateAppModal } from '@/components/RateAppModal';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -101,6 +103,7 @@ export default function DocumentVaultScreen() {
   const [docs, setDocs] = useState<StoredDocument[]>([]);
   const [viewer, setViewer] = useState<StoredDocument | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rateModalVisible, setRateModalVisible] = useState(false);
 
   // zoom / pan state for the fullscreen viewer
   const scale       = useSharedValue(1);
@@ -246,6 +249,7 @@ export default function DocumentVaultScreen() {
       const permanentUri = await saveImageToVault(result.assets[0].uri);
       await addDocument(type, permanentUri);
       await loadDocs();
+      if (await registerPositiveAction()) setRateModalVisible(true);
     } catch (e) {
       Alert.alert('Error', 'Could not save image. Please try again.');
     } finally {
@@ -393,6 +397,8 @@ export default function DocumentVaultScreen() {
         </View>
         </GestureHandlerRootView>
       </Modal>
+
+      <RateAppModal visible={rateModalVisible} onClose={() => setRateModalVisible(false)} />
     </>
   );
 }
